@@ -2,10 +2,11 @@ mongo = require("mongodb")
 mongoose = require("mongoose")
 express = require("express")
 path = require("path")
+flash = require("connect-flash")
 
 settings = require("./settings")
 
-startDB = (next) ->
+startDBAndThen = (next) ->
   console.log("Starting DB")
   db = mongoose.connect(settings.mongooseUrl).connection
   db.on("error", console.error.bind(console, "connection error:"))
@@ -29,10 +30,17 @@ startExpress = () ->
     app.use(express.favicon())
     app.use(express.logger())
     app.use(express.bodyParser())
-    app.use(express.methodOverride());
+    app.use(express.methodOverride())
     app.use(require('stylus').middleware(settings.baseDir + 'public'))
     app.use(express.static(path.join(settings.baseDir, 'public')))
-    # add error handler middleware here
+
+    app.use(express.cookieParser())
+    app.use(express.session({ secret: 'sfoh3092hf2o3gho23h' }))
+    app.use(flash())
+
+    # final middleware
+    app.use(express.errorHandler({showStack: true, dumpExceptions: true}))
+
 
   )
 
@@ -46,7 +54,5 @@ startExpress = () ->
   app.listen(settings.port)
   console.log("Express listening on port " + settings.port)
 
-startServer = () ->
-  startDB(startExpress)
-
-startServer()
+# start the server
+startDBAndThen(startExpress)

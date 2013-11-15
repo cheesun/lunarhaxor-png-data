@@ -1,2 +1,4 @@
+render = require('./helpers').render
+
 exports.index = (req, res) ->
-  res.render('index', { title: 'MedRec' })
+  render(req, res, 'index', { title: 'MedRec' })
